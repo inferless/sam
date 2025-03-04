@@ -1,3 +1,6 @@
+import os
+os.environ["HF_HUB_ENABLE_HF_TRANSFER"]='1'
+from huggingface_hub import snapshot_download
 import torch
 from transformers import SamModel, SamProcessor
 from PIL import Image
@@ -10,9 +13,11 @@ from io import BytesIO
 
 class InferlessPythonModel:
   def initialize(self):
+      model_id = "facebook/sam-vit-huge"
+      snapshot_download(repo_id=model_id,allow_patterns=["*.safetensors"])
       self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-      self.model = SamModel.from_pretrained("facebook/sam-vit-huge").to(self.device)
-      self.processor = SamProcessor.from_pretrained("facebook/sam-vit-huge")
+      self.model = SamModel.from_pretrained(model_id).to(self.device)
+      self.processor = SamProcessor.from_pretrained(model_id)
 
   def process_image(self,masks,raw_image):
       mask = masks[0].squeeze()
