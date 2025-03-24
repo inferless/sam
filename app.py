@@ -53,7 +53,10 @@ class InferlessPythonModel:
   def infer(self,inputs):
       input_points = [[inputs["input_points"]]]
       img_url = inputs["image_url"]
-      raw_image = Image.open(requests.get(img_url, stream=True).raw).convert("RGB")
+      
+      response = requests.get(img_url)
+      raw_image = Image.open(BytesIO(response.content)).convert("RGB")
+
       inputs = self.processor(raw_image, return_tensors="pt").to(self.device)
       image_embeddings = self.model.get_image_embeddings(inputs["pixel_values"])
       inputs = self.processor(raw_image, input_points=input_points, return_tensors="pt").to(self.device)
